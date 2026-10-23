@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04 # ಹೆಚ್ಚು ಸ್ಥಿರವಾದ ಉಬುಂಟು ಆವೃತ್ತಿ
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout Repository
@@ -23,22 +23,19 @@ jobs:
           build-essential ccache git libffi-dev libssl-dev \
           libsqlite3-dev openssl python3-dev unzip zip zlib1g-dev \
           openjdk-17-jdk-headless autoconf libtool pkg-config \
-          shared-mime-info text-renderer
+          shared-mime-info
         pip install --upgrade pip
         pip install "cython<3.0.0" virtualenv buildozer
 
     - name: Build with Buildozer
       run: |
-        # ಹೊಸದಾಗಿspec ಫೈಲ್ ಕ್ರಿಯೇಟ್ ಮಾಡಿ ಸರಿಯಾದ ಕಾನ್ಫಿಗರೇಶನ್ ಹೊಂದಿಸುವುದು
         rm -f buildozer.spec
         buildozer init
         
-        # ಆಪ್ ಕಾನ್ಫಿಗರೇಶನ್ ಬದಲಾವಣೆಗಳು
         sed -i 's/title = My Application/title = JagadishArk/' buildozer.spec
         sed -i 's/package.name = myapp/package.name = jagadishark/' buildozer.spec
         sed -i 's/#android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
         
-        # ಬಿಲ್ಡ್ ಪ್ರಕ್ರಿಯೆ (ಲೈಸೆನ್ಸ್ ಆಟೋಮ್ಯಾಟಿಕ್ ಆಗಿ ಒಪ್ಪಿಕೊಳ್ಳಲು 'yes |' ಬಳಸಲಾಗಿದೆ)
         export BUILDOZER_WARN_ON_ROOT=0
         yes | buildozer -v android debug
 
