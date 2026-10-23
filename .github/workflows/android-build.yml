@@ -1,7 +1,7 @@
 name: Android APK Build
 
 on:
-  workflow_dispatch: # ಇದರಿಂದ ನೀವು ಮ್ಯಾನುಯಲ್ ಆಗಿ ಬಿಲ್ಡ್ ರನ್ ಮಾಡಬಹುದು
+  workflow_dispatch: # ಇದರಿಂದ ನೀವು ಮ್ಯಾನ್ಯುಯಲ್ ಆಗಿ ಬಿಲ್ಡ್ ರನ್ ಮಾಡಬಹುದು
 
 jobs:
   build:
@@ -19,16 +19,22 @@ jobs:
     - name: Install Dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libsqlite3-dev
+        sudo apt-get install -y libsqlite3-dev lld libffi-dev libssl-dev autoconf automake libtool pkg-config zlib1g-dev
         pip install --upgrade pip
         pip install buildozer cython virtualenv
+
+    - name: Accept Android Licenses
+      run: |
+        mkdir -p ~/.android
+        touch ~/.android/repositories.cfg
+        yes | sdkmanager --licenses || true
 
     - name: Build with Buildozer
       run: |
         # ಒಂದು ವೇಳೆ buildozer.spec ಫೈಲ್ ಇಲ್ಲದಿದ್ದರೆ ಹೊಸದಾಗಿ ಕ್ರಿಯೇಟ್ ಮಾಡುತ್ತದೆ
         if [ ! -f buildozer.spec ]; then
           buildozer init
-          # ಇಲ್ಲಿ ನಿಮ್ಮ ಆಪ್ ಹೆಸರನ್ನು JagadishArk ಎಂದು ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ
+          # ಇಲ್ಲಿ ನಿಮ್ಮ ಆಪ್ ಹೆಸರನ್ನು JagadishArk ಎಂದು ಬದಲಾಯಿಸಲಾಗುತ್ತದೆ
           sed -i 's/title = My Application/title = JagadishArk/' buildozer.spec
           sed -i 's/package.name = myapp/package.name = jagadishark/' buildozer.spec
         fi
@@ -41,6 +47,3 @@ jobs:
       with:
         name: JagadishArk-Android-APK
         path: bin/*.apk
-- name: Accept Android Licenses
-  run: yes | sdkmanager --licenses
-  
