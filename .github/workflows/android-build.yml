@@ -1,7 +1,7 @@
 name: Android APK Build
 
 on:
-  workflow_dispatch: # ಇದರಿಂದ ನೀವು ಮ್ಯಾನ್ಯುಯಲ್ ಆಗಿ ಬಿಲ್ಡ್ ರನ್ ಮಾಡಬಹುದು
+  workflow_dispatch:
 
 jobs:
   build:
@@ -31,15 +31,11 @@ jobs:
 
     - name: Build with Buildozer
       run: |
-        # ಒಂದು ವೇಳೆ buildozer.spec ಫೈಲ್ ಇಲ್ಲದಿದ್ದರೆ ಹೊಸದಾಗಿ ಕ್ರಿಯೇಟ್ ಮಾಡುತ್ತದೆ
         if [ ! -f buildozer.spec ]; then
           buildozer init
-          # ಇಲ್ಲಿ ನಿಮ್ಮ ಆಪ್ ಹೆಸರನ್ನು JagadishArk ಎಂದು ಬದಲಾಯಿಸಲಾಗುತ್ತದೆ
           sed -i 's/title = My Application/title = JagadishArk/' buildozer.spec
           sed -i 's/package.name = myapp/package.name = jagadishark/' buildozer.spec
         fi
-        
-        # APK ಬಿಲ್ಡ್ ಪ್ರಕ್ರಿಯೆ ಪ್ರಾರಂಭ
         buildozer -v android debug
 
     - name: Upload APK Artifact
