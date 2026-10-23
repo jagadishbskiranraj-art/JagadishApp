@@ -1,46 +1,68 @@
-name: Android APK Build
+name: CI
 
+# Triggers the workflow on push or pull request events for the main branch
 on:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v3
 
+    # 1. Set up Python 3.10 (Stable version to avoid CPython 3.14 build errors)
     - name: Set up Python
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: Install System Dependencies
+    # 2. Cache Buildozer directories to speed up future builds and prevent timeouts
+    - name: Cache Buildozer global directory
+      uses: actions/cache@v3
+      with:
+        path: |
+          .buildozer
+          ~/.buildozer
+        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+        restore-keys: |
+          ${{ runner.os }}-buildozer-
+
+    # 3. Install system dependencies required by Buildozer and Android SDK
+    - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y --no-install-recommends \
-          build-essential ccache git libffi-dev libssl-dev \
-          libsqlite3-dev openssl python3-dev unzip zip zlib1g-dev \
-          openjdk-17-jdk-headless autoconf libtool pkg-config \
-          shared-mime-info
-        pip install --upgrade pip
-        pip install "cython<3.0.0" virtualenv buildozer
+        sudo apt-get install -y \
+            git \
+            zip \
+            unzip \
+            autoconf \
+            libtool \
+            pkg-config \
+            zlib1g-dev \
+            libncurses5-dev \
+            libncursesw5-dev \
+            libffi-dev \
+            libssl-dev \
+            openjdk-17-jdk
 
+    # 4. Install Buildozer and Cython
+    - name: Install Buildozer and Cython
+      run: |
+        pip install --upgrade pip
+        pip install cython==0.29.36 buildozer
+
+    # 5. Build Android APK using Buildozer
     - name: Build with Buildozer
       run: |
-        rm -f buildozer.spec
-        buildozer init
-        
-        sed -i 's/title = My Application/title = JagadishArk/' buildozer.spec
-        sed -i 's/package.name = myapp/package.name = jagadishark/' buildozer.spec
-        sed -i 's/#android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
-        
-        export BUILDOZER_WARN_ON_ROOT=0
-        yes | buildozer -v android debug
+        buildozer -v android debug
 
+    # 6. Upload the generated APK as an artifact so you can download it
     - name: Upload APK Artifact
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v3
       with:
-        name: JagadishArk-Android-APK
+        name: package
         path: bin/*.apk
