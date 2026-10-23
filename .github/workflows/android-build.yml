@@ -41,3 +41,6 @@ jobs:
       with:
         name: JagadishArk-Android-APK
         path: bin/*.apk
+- name: Accept Android Licenses
+  run: yes | sdkmanager --licenses
+  
