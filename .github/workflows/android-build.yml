@@ -1,68 +1,58 @@
-name: CI
+name: Build Android APK
 
-# Triggers the workflow on push or pull request events for the main branch
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    # 1. Set up Python 3.10 (Stable version to avoid CPython 3.14 build errors)
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-    # 2. Cache Buildozer directories to speed up future builds and prevent timeouts
-    - name: Cache Buildozer global directory
-      uses: actions/cache@v3
-      with:
-        path: |
-          .buildozer
-          ~/.buildozer
-        key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
-        restore-keys: |
-          ${{ runner.os }}-buildozer-
+      - name: Install System Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+              git \
+              zip \
+              unzip \
+              autoconf \
+              libtool \
+              pkg-config \
+              zlib1g-dev \
+              libncurses5-dev \
+              libncursesw5-dev \
+              libtinfo5 \
+              cmake \
+              libffi-dev \
+              libssl-dev
 
-    # 3. Install system dependencies required by Buildozer and Android SDK
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-            git \
-            zip \
-            unzip \
-            autoconf \
-            libtool \
-            pkg-config \
-            zlib1g-dev \
-            libncurses5-dev \
-            libncursesw5-dev \
-            libffi-dev \
-            libssl-dev \
-            openjdk-17-jdk
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-    # 4. Install Buildozer and Cython
-    - name: Install Buildozer and Cython
-      run: |
-        pip install --upgrade pip
-        pip install cython==0.29.36 buildozer
+      - name: Install Buildozer and Cython
+        run: |
+          pip install --upgrade pip
+          pip install Cython==0.29.36 buildozer
 
-    # 5. Build Android APK using Buildozer
-    - name: Build with Buildozer
-      run: |
-        buildozer -v android debug
+      - name: Build APK with Buildozer
+        run: |
+          buildozer -v android debug
 
-    # 6. Upload the generated APK as an artifact so you can download it
-    - name: Upload APK Artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: package
-        path: bin/*.apk
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: bin/*.apk
