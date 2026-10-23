@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     # 1. Set up Python 3.10 (Stable version to avoid CPython 3.14 build errors)
     - name: Set up Python
