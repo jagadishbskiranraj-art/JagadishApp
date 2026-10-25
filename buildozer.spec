@@ -27,5 +27,3 @@ log_level = 2
 warn_on_root = 1
 version = 0.1
 source.dir = .
-version = 0.1
-source.dir = .
