@@ -1,4 +1,8 @@
-name: Build Android APK
+- name: Accept Android SDK licenses
+        run: |
+          mkdir -p /home/runner/.android
+          yes | sdkmanager --licenses || true
+      name: Build Android APK
 
 on:
   push:
