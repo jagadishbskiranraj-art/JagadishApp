@@ -55,3 +55,7 @@ jobs:
         with:
           name: package
           path: bin/*.apk
+buildozer init
+git add buildozer.spec
+git commit -m "Add buildozer.spec configuration file"
+git push origin main
